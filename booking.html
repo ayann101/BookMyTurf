@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Book Slot | Galaxy Turf</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <form id="bookingForm">
+      <input type="text" id="name" placeholder="Your Name" required />
+      <input type="tel" id="phone" placeholder="Phone Number" required />
+      <select id="turf" required>
+        <option value="">Select Turf</option>
+        <option value="Galaxy Turf">Galaxy Turf</option>
+        <option value="Skyline Turf">Skyline Turf</option>
+        <option value="Star Arena">Star Arena</option>
+        <option value="Green Field">Green Field</option>
+      </select>
+
+      <h3>Select Time Slots</h3>
+      <div class="slot-container" id="slots"></div>
+
+      <div id="totalPrice">Total: ₹0</div>
+      <p>Pay ₹700/hour using:</p>
+      <div class="payment-methods">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Google_Pay_Logo.svg/512px-Google_Pay_Logo.svg.png" alt="GPay" />
+        <img src="https://upload.wikimedia.org/wikipedia/commons/f/f1/PhonePe_Logo_2021.svg" alt="PhonePe" />
+      </div>
+
+      <button type="submit">Confirm Booking</button>
+    </form>
+  </div>
+
+  <!-- Firebase Setup (module) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDFwv08E8IbZ5p9lSndv8EY8-yMQMuT0Eg",
+      authDomain: "bookmyturf-1fba9.firebaseapp.com",
+      projectId: "bookmyturf-1fba9",
+      storageBucket: "bookmyturf-1fba9.appspot.com",
+      messagingSenderId: "1055187444342",
+      appId: "1:1055187444342:web:c2276eb3eaf4e3d1b34c36",
+      measurementId: "G-WQ19J65FFG"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    window.db = db; // make it available to booking.js
+  </script>
+
+  <!-- Load Booking Script -->
+  <script type="module" src="booking.js"></script>
+</body>
+</html>

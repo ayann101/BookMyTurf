@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Verify Booking</title>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <style>
+    body { font-family: Arial, sans-serif; text-align:center; padding:20px; background:#111; color:#fff; }
+    #reader { width:300px; margin:auto; }
+    #result { margin-top:20px; }
+  </style>
+</head>
+<body>
+  <h2>Scan QR to Verify Entry</h2>
+  <div id="reader"></div>
+  <div id="result"></div>
+  <script>
+    const db = firebase.firestore();
+    const resultDiv = document.getElementById('result');
+    function onScanSuccess(decodedText, decodedResult) {
+      // Stop scanning
+      html5QrcodeScanner.clear();
+      resultDiv.innerText = 'Checking...';
+      db.collection('bookings').doc(decodedText).get()
+        .then(doc => {
+          if (!doc.exists) {
+            resultDiv.innerHTML = '<span style="color:red">Invalid Booking</span>';
+          } else {
+            const data = doc.data();
+            const now = new Date();
+            const slotDate = new Date(data.date + 'T' + data.time);
+            const slotEnd = new Date(slotDate.getTime() + 60*60*1000);
+            if (now >= slotDate && now <= slotEnd) {
+              resultDiv.innerHTML = `<span style="color:lime">Entry Allowed</span><br>
+                                     Name: ${data.name}<br>
+                                     Turf: ${data.turf}<br>
+                                     Time: ${data.date} ${data.time}`;
+            } else {
+              resultDiv.innerHTML = `<span style="color:orange">Not in valid time window</span><br>
+                                     Valid: ${data.date} ${data.time} - 1 hour`;
+            }
+          }
+        }).catch(err => {
+          console.error(err);
+          resultDiv.innerHTML = '<span style="color:red">Error verifying</span>';
+        });
+    }
+    // Initialize scanner
+    const html5QrcodeScanner = new Html5Qrcode("reader");
+    html5QrcodeScanner.start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox: 250 },
+      onScanSuccess
+    );
+  </script>
+</body>
+</html>

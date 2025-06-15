@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Contact Us - BookMyTurf</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .contact-section {
+      max-width: 900px;
+      margin: 50px auto;
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .turf-contact {
+      border-bottom: 1px solid #ddd;
+      padding: 20px 0;
+    }
+
+    .turf-contact:last-child {
+      border-bottom: none;
+    }
+
+    .turf-contact h3 {
+      margin-bottom: 5px;
+      color: #2c3e50;
+    }
+
+    .turf-contact p {
+      margin: 5px 0;
+      color: #555;
+    }
+
+    .contact-form {
+      margin-top: 40px;
+    }
+
+    .contact-form input,
+    .contact-form textarea {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .contact-form button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+
+    .contact-form button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="booking.html">Booking</a></li>
+      <li><a href="admin.html">Admin</a></li>
+      <li><a href="verify.html">Verify</a></li>
+      <li><a href="contact.html" class="active">Contact</a></li>
+    </ul>
+  </nav>
+
+  <div class="contact-section">
+    <h2>📞 Contact Information</h2>
+
+    <div class="turf-contact">
+      <h3>🏏 Galaxy Turf - Green Park</h3>
+      <p>📍 Location: Green Park, Delhi</p>
+      <p>📱 Phone: +91 9876543210</p>
+    </div>
+
+    <div class="turf-contact">
+      <h3>🏏 Sky Turf - Rohini</h3>
+      <p>📍 Location: Rohini, Delhi</p>
+      <p>📱 Phone: +91 8765432109</p>
+    </div>
+
+    <div class="turf-contact">
+      <h3>🏏 Moonlight Turf - Noida</h3>
+      <p>📍 Location: Sector 62, Noida</p>
+      <p>📱 Phone: +91 9988776655</p>
+    </div>
+
+    <div class="turf-contact">
+      <h3>🏏 Nova Turf - Pitampura</h3>
+      <p>📍 Location: Pitampura, Delhi</p>
+      <p>📱 Phone: +91 9090909090</p>
+    </div>
+
+    <div class="contact-form">
+      <h3>Send Us a Message</h3>
+      <form>
+        <input type="text" placeholder="Your Name" required />
+        <input type="email" placeholder="Your Email" required />
+        <textarea rows="5" placeholder="Your Message" required></textarea>
+        <button type="submit">Send Message</button>
+      </form>
+    </div>
+  </div>
+
+</body>
+</html>

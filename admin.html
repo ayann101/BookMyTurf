@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel - BookMyTurf</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <nav>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="booking.html">Booking</a></li>
+      <li><a href="admin.html" class="active">Admin Panel</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    <h2>📋 All Bookings</h2>
+
+    <div class="filter">
+      <label for="filterTurf">Turf:</label>
+      <select id="filterTurf">
+        <option value="all">All</option>
+        <option value="galaxy-greenpark">Galaxy Turf - Green Park</option>
+        <option value="sky-rohini">Sky Turf - Rohini</option>
+        <option value="moonlight-noida">Moonlight Turf - Noida</option>
+        <option value="nova-pitampura">Nova Turf - Pitampura</option>
+      </select>
+
+      <label for="filterDate">Date:</label>
+      <input type="date" id="filterDate" />
+      <button onclick="loadBookings()">Apply Filter</button>
+    </div>
+
+    <table id="bookingTable">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Turf</th>
+          <th>Date</th>
+          <th>Time</th>
+          <th>Duration</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
