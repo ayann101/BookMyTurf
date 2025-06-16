@@ -21,6 +21,7 @@ nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 nav a {
@@ -34,6 +35,11 @@ nav a:hover {
   text-decoration: underline;
 }
 
+.logo {
+  font-size: 20px;
+  font-weight: bold;
+}
+
 /* CONTAINER */
 .container {
   max-width: 1200px;
@@ -41,7 +47,7 @@ nav a:hover {
   padding: 20px;
 }
 
-/* HERO */
+/* HERO SECTION */
 .hero {
   text-align: center;
   padding: 60px 20px;
@@ -108,7 +114,8 @@ nav a:hover {
 }
 
 /* FORM */
-form {
+form,
+.booking-form {
   max-width: 600px;
   margin: auto;
   background: #fff;
@@ -118,80 +125,140 @@ form {
 }
 
 form input,
-form select {
+form select,
+.booking-form input,
+.booking-form select {
   width: 100%;
-  padding: 12px;
-  margin-top: 10px;
-  margin-bottom: 20px;
+  padding: 12px 14px;
+  margin: 10px 0;
   border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-form button {
-  background-color: #004d99;
-  color: #fff;
-  border: none;
-  padding: 12px 20px;
   font-size: 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  width: 100%;
+  border-radius: 8px;
 }
 
-form button:hover {
-  background-color: #003366;
+/* BOOKING HEADING */
+.booking-heading {
+  text-align: center;
+  font-size: 26px;
+  color: #009688;
+  margin-bottom: 20px;
 }
 
-/* SLOT SELECTOR */
+/* SLOT CONTAINER */
 .slot-container {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin: 20px 0;
   justify-content: center;
+  margin-top: 15px;
 }
 
 .slot {
   width: 70px;
   padding: 10px;
-  text-align: center;
   border-radius: 6px;
+  font-size: 14px;
   font-weight: bold;
+  text-align: center;
   cursor: pointer;
-  color: #fff;
-  background-color: green;
   transition: 0.2s ease;
+  background-color: #d0f8ce;
+  color: #2e7d32;
+  border: 1px solid #aaa;
 }
 
 .slot.booked {
-  background-color: red;
+  background-color: #ef5350;
+  color: white;
   cursor: not-allowed;
-  opacity: 0.6;
+  text-decoration: line-through;
 }
 
 .slot.selected {
-  background-color: skyblue;
-  border: 2px solid white;
+  background-color: #00acc1;
+  color: white;
 }
 
-/* PRICE */
-#totalPrice, .total-price {
-  margin-top: 10px;
+/* PRICE & HOUR INFO */
+.hour-info,
+.total-price,
+#totalPrice {
+  text-align: center;
   font-size: 18px;
   font-weight: bold;
+  margin-top: 10px;
   color: #004d99;
-  text-align: center;
 }
 
-/* PAYMENT */
+/* BUTTONS */
+form button,
+.submit-btn {
+  background-color: #004d99;
+  color: #fff;
+  border: none;
+  padding: 14px;
+  font-size: 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 10px;
+  transition: background-color 0.3s ease;
+}
+
+form button:hover,
+.submit-btn:hover {
+  background-color: #003366;
+}
+
+/* PAYMENT METHODS */
 .payment-methods {
-  margin: 20px 0;
   text-align: center;
+  margin: 20px 0;
 }
 
 .payment-methods img {
   width: 120px;
   margin: 10px;
+}
+
+/* QR VERIFY */
+.verify-box {
+  max-width: 500px;
+  margin: auto;
+  padding: 30px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.15);
+  text-align: center;
+}
+
+/* SEARCH BAR */
+#searchInput, #searchBar {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 16px;
+  border-radius: 30px;
+  border: 2px solid #00bcd4;
+  background: #f0faff;
+  background-image: url('https://img.icons8.com/ios-filled/20/search--v1.png');
+  background-position: 12px center;
+  background-repeat: no-repeat;
+  padding-left: 40px;
+  margin-bottom: 20px;
+  transition: 0.3s;
+}
+
+#searchInput:focus,
+#searchBar:focus {
+  outline: none;
+  border-color: #009688;
+  background: #e0f7fa;
+  box-shadow: 0 0 15px rgba(0, 150, 136, 0.4);
+}
+
+.search-section {
+  text-align: center;
+  margin: 30px auto 20px;
 }
 
 /* FOOTER */
@@ -203,45 +270,80 @@ footer {
   margin-top: 40px;
 }
 
-/* QR VERIFY BOX */
-.verify-box {
-  max-width: 500px;
-  margin: auto;
-  padding: 30px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.15);
-  text-align: center;
-}
-form select {
-  padding: 10px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-  margin-bottom: 20px;
-}
+/* RESPONSIVE FIXES */
+@media (max-width: 768px) {
+  nav {
+    flex-direction: column;
+    text-align: center;
+  }
 
-.slot-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
-  gap: 10px;
-  justify-content: center;
-}
+  .turfs {
+    flex-direction: column;
+    align-items: center;
+  }
 
-.slot {
-  padding: 10px;
-  background-color: green;
-  color: white;
-  border-radius: 5px;
-  cursor: pointer;
+  .turf-card,
+  form,
+  .booking-form {
+    width: 90%;
+  }
+
+  .hero h1 {
+    font-size: 32px;
+  }
+
+  .hero p {
+    font-size: 16px;
+  }
+
+  .slot {
+    width: 60px;
+    font-size: 13px;
+    padding: 8px;
+  }
+
+  .total-price {
+    font-size: 16px;
+  }
+}
+.booking-form label {
   font-weight: bold;
-  text-align: center;
+  display: block;
+  margin-top: 12px;
+  color: #004d99;
 }
 
-.slot.selected {
-  background-color: blue;
+.booking-form input:invalid,
+.booking-form select:invalid {
+  border-color: #e53935;
 }
 
-.slot.booked {
-  background-color: red;
-  cursor: not-allowed;
+.booking-form input:valid,
+.booking-form select:valid {
+  border-color: #4caf50;
 }
+
+/* Mobile improvements */
+@media (max-width: 480px) {
+  .booking-heading {
+    font-size: 22px;
+    padding: 10px;
+  }
+
+  .slot {
+    width: 50px;
+    font-size: 12px;
+    padding: 6px;
+  }
+
+  .submit-btn {
+    font-size: 15px;
+    padding: 12px;
+  }
+
+  .payment-methods img {
+    width: 100px;
+  }
+}
+ 
+

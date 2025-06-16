@@ -1,39 +1,64 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Book Slot | Galaxy Turf</title>
+  <title>Galaxy Turf Booking</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
-    <form id="bookingForm">
+
+  <nav>
+    <div class="logo">🏏 <strong>Galaxy Turf</strong></div>
+    <div>
+      <a href="index.html">Home</a>
+      <a href="booking.html" class="active">Booking</a>
+      <a href="contact.html">Contact</a>
+    </div>
+  </nav>
+
+  <div class="container booking-container">
+    <h1 class="booking-heading">🏏 Book Your Slot Now</h1>
+
+    <form id="bookingForm" class="booking-form" autocomplete="off">
+      <label for="name">Your Name</label>
       <input type="text" id="name" placeholder="Your Name" required />
-      <input type="tel" id="phone" placeholder="Phone Number" required />
+
+      <label for="phone">Phone Number</label>
+      <input type="tel" id="phone" placeholder="Phone Number" required maxlength="10" inputmode="numeric" />
+
+      <label for="turf">Select Turf</label>
       <select id="turf" required>
         <option value="">Select Turf</option>
-        <option value="Galaxy Turf">Galaxy Turf</option>
-        <option value="Skyline Turf">Skyline Turf</option>
-        <option value="Star Arena">Star Arena</option>
-        <option value="Green Field">Green Field</option>
+        <option value="Galaxy Turf A">Galaxy Turf A</option>
+        <option value="Galaxy Turf B">Galaxy Turf B</option>
+        <option value="Galaxy Turf C">Galaxy Turf C</option>
+        <option value="Galaxy Turf D">Galaxy Turf D</option>
       </select>
 
-      <h3>Select Time Slots</h3>
-      <div class="slot-container" id="slots"></div>
+      <label for="date">Select Date</label>
+      <input type="date" id="date" required />
 
-      <div id="totalPrice">Total: ₹0</div>
-      <p>Pay ₹700/hour using:</p>
+      <label>Select Time Slots</label>
+      <div id="slotContainer" class="slot-container"></div>
+      <div id="hourInfo" class="hour-info"></div>
+      <div id="totalPrice" class="total-price"></div>
+
+      <button type="submit" class="submit-btn">✅ Confirm Booking</button>
+
       <div class="payment-methods">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Google_Pay_Logo.svg/512px-Google_Pay_Logo.svg.png" alt="GPay" />
-        <img src="https://upload.wikimedia.org/wikipedia/commons/f/f1/PhonePe_Logo_2021.svg" alt="PhonePe" />
+        <h3>Pay using UPI</h3>
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=abcxyz@upi&pn=GalaxyTurf&cu=INR" alt="Scan QR to Pay" />
+        <br/>
+        <a href="upi://pay?pa=abcxyz@upi&pn=GalaxyTurf&am=700&cu=INR" target="_blank">
+          <button type="button">💰 Pay with GPay / PhonePe</button>
+        </a>
       </div>
-
-      <button type="submit">Confirm Booking</button>
     </form>
   </div>
 
-  <!-- Firebase Setup (module) -->
+  <!-- Firebase Config -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -50,10 +75,10 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    window.db = db; // make it available to booking.js
+    window.db = db;
   </script>
 
-  <!-- Load Booking Script -->
+  <!-- Booking Logic -->
   <script type="module" src="booking.js"></script>
 </body>
-</html>
+</html>  

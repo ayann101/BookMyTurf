@@ -1,49 +1,76 @@
-// Get Firestore from global scope
-const db = window.db;
-
 import {
   collection,
-  addDoc,
   getDocs,
+  addDoc,
   query,
   where
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
 
-const slotContainer = document.getElementById("slots");
+import { db } from './firebase-config.js';
+
+const slotContainer = document.getElementById("slotContainer");
 const totalPriceEl = document.getElementById("totalPrice");
+const hourInfo = document.getElementById("hourInfo");
 const bookingForm = document.getElementById("bookingForm");
 
-const allSlots = Array.from({ length: 24 }, (_, i) => `${i}:00`);
-let selectedSlots = [];
 const pricePerHour = 700;
+let selectedSlots = [];
 
-// Load and display all time slots
+function to12HourFormat(hour) {
+  const suffix = hour >= 12 ? "PM" : "AM";
+  const hour12 = hour % 12 === 0 ? 12 : hour % 12;
+  return `${hour12}:00 ${suffix}`;
+}
+
+function getDayNightTag(hour) {
+  if (hour >= 6 && hour < 18) return "☀️ Day";
+  return "🌙 Night";
+}
+
+const allSlots = Array.from({ length: 24 }, (_, i) => i);
+
 function renderSlots() {
   slotContainer.innerHTML = "";
-  allSlots.forEach((time) => {
+  allSlots.forEach((hr) => {
     const slot = document.createElement("div");
     slot.className = "slot available";
-    slot.innerText = time;
-    slot.dataset.time = time;
+    slot.dataset.time = hr.toString();
+    slot.innerText = `${to12HourFormat(hr)} — ${getDayNightTag(hr)}`;
     slotContainer.appendChild(slot);
   });
 }
 
-function updateTotalPrice() {
-  totalPriceEl.textContent = `Total: ₹${selectedSlots.length * pricePerHour}`;
+function updateTotal() {
+  hourInfo.textContent = `⏱️ Selected Hours: ${selectedSlots.length}`;
+  totalPriceEl.textContent = `💰 Total: ₹${selectedSlots.length * pricePerHour}`;
 }
 
 function toggleSlot(slotEl) {
+  const time = parseInt(slotEl.dataset.time);
   if (slotEl.classList.contains("booked")) return;
-  const time = slotEl.dataset.time;
-  if (selectedSlots.includes(time)) {
-    selectedSlots = selectedSlots.filter(t => t !== time);
+
+  // Deselect if already selected
+  if (slotEl.classList.contains("selected")) {
     slotEl.classList.remove("selected");
+    selectedSlots = selectedSlots.filter(t => parseInt(t) !== time);
   } else {
-    selectedSlots.push(time);
-    slotEl.classList.add("selected");
+    // If already selected some slot, allow only consecutive selection
+    if (selectedSlots.length > 0) {
+      const min = Math.min(...selectedSlots.map(Number));
+      const max = Math.max(...selectedSlots.map(Number));
+      if (time === max + 1 || time === min - 1) {
+        selectedSlots.push(time.toString());
+        slotEl.classList.add("selected");
+      } else {
+        alert("⚠️ Select consecutive hours only.");
+      }
+    } else {
+      selectedSlots.push(time.toString());
+      slotEl.classList.add("selected");
+    }
   }
-  updateTotalPrice();
+  selectedSlots = [...new Set(selectedSlots)].sort((a, b) => parseInt(a) - parseInt(b));
+  updateTotal();
 }
 
 slotContainer.addEventListener("click", (e) => {
@@ -52,21 +79,27 @@ slotContainer.addEventListener("click", (e) => {
   }
 });
 
-// Load already booked slots from Firestore
 async function loadBookedSlots() {
   const turf = document.getElementById("turf").value;
-  if (!turf) return;
+  const date = document.getElementById("date").value;
+  if (!turf || !date) return;
 
-  const q = query(collection(db, "bookings"), where("turf", "==", turf));
+  const q = query(
+    collection(db, "bookings"),
+    where("turf", "==", turf),
+    where("date", "==", date)
+  );
   const snapshot = await getDocs(q);
 
-  const booked = new Set();
+  const bookedSet = new Set();
   snapshot.forEach(doc => {
-    doc.data().slots.forEach(slot => booked.add(slot));
+    const data = doc.data();
+    (data.slots || []).forEach(slot => bookedSet.add(slot));
   });
 
   document.querySelectorAll(".slot").forEach(el => {
-    if (booked.has(el.dataset.time)) {
+    const time = el.dataset.time;
+    if (bookedSet.has(time)) {
       el.classList.remove("available", "selected");
       el.classList.add("booked");
     } else {
@@ -76,21 +109,26 @@ async function loadBookedSlots() {
   });
 
   selectedSlots = [];
-  updateTotalPrice();
+  updateTotal();
 }
 
 document.getElementById("turf").addEventListener("change", loadBookedSlots);
+document.getElementById("date").addEventListener("change", loadBookedSlots);
 
-// Submit Booking
+document.getElementById("phone").addEventListener("input", function () {
+  this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);
+});
+
 bookingForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const name = document.getElementById("name").value.trim();
   const phone = document.getElementById("phone").value.trim();
   const turf = document.getElementById("turf").value;
+  const date = document.getElementById("date").value;
 
-  if (!name || !phone || !turf || selectedSlots.length === 0) {
-    alert("Please fill all fields and select slots.");
+  if (!name || !phone || !turf || !date || selectedSlots.length === 0) {
+    alert("⚠️ Please fill all fields and select at least 1 slot.");
     return;
   }
 
@@ -99,17 +137,18 @@ bookingForm.addEventListener("submit", async (e) => {
       name,
       phone,
       turf,
+      date,
       slots: selectedSlots,
       timestamp: new Date().toISOString()
     });
 
-    alert("Booking confirmed! Please complete payment.");
+    alert(`✅ Booking Confirmed!\nName: ${name}\nSlots: ${selectedSlots.join(", ")}\nTotal: ₹${selectedSlots.length * pricePerHour}\n\n📱 Please proceed with UPI payment.`);
+
     loadBookedSlots();
   } catch (err) {
-    console.error("Error booking:", err);
-    alert("Booking failed. Try again.");
+    console.error("❌ Booking failed:", err);
+    alert("❌ Error during booking. Please try again.");
   }
 });
 
-// Initialize
 renderSlots();

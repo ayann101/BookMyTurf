@@ -1,5 +1,6 @@
+<!-- index.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -17,37 +18,48 @@
   </nav>
 
   <div class="container">
-    <div class="hero">
-      <h1>Book Your Turf Anytime!</h1>
-      <p>Welcome to Galaxy Turf at Green Park – Open 24/7</p>
-    </div>
-
-    <div class="turfs">
-      <div class="turf-card">
-        <h3>Galaxy Turf A</h3>
-        <p>Open field with lighting</p>
-        <button onclick="location.href='booking.html'">Book Now</button>
-      </div>
-      <div class="turf-card">
-        <h3>Galaxy Turf B</h3>
-        <p>Enclosed turf with net</p>
-        <button onclick="location.href='booking.html'">Book Now</button>
-      </div>
-      <div class="turf-card">
-        <h3>Galaxy Turf C</h3>
-        <p>Indoor mini ground</p>
-        <button onclick="location.href='booking.html'">Book Now</button>
-      </div>
-      <div class="turf-card">
-        <h3>Galaxy Turf D</h3>
-        <p>Multipurpose space</p>
-        <button onclick="location.href='booking.html'">Book Now</button>
-      </div>
-    </div>
+    <input type="text" id="searchBar" placeholder="🔍 Search Your Turf" />
+    <div class="turfs" id="turfContainer"></div>
   </div>
 
   <footer>
     &copy; 2025 Galaxy Turf - All rights reserved.
   </footer>
+
+  <script>
+    const turfData = [
+      { name: "Galaxy Turf A", location: "Green Park", booked: 6 },
+      { name: "Galaxy Turf B", location: "Red Hills", booked: 3 },
+      { name: "Galaxy Turf C", location: "Sector 5", booked: 8 },
+      { name: "Galaxy Turf D", location: "Skyline Road", booked: 4 }
+    ];
+
+    const turfContainer = document.getElementById("turfContainer");
+    const searchBar = document.getElementById("searchBar");
+
+    function renderTurfs(list) {
+      turfContainer.innerHTML = "";
+      list.forEach(turf => {
+        const free = 24 - turf.booked;
+        const card = document.createElement("div");
+        card.className = "turf-card";
+        card.innerHTML = `
+          <h3>${turf.name}</h3>
+          <p>📍 ${turf.location}</p>
+          <p>🎯 ${turf.booked} booked | ${free} available</p>
+          <button onclick="window.location.href='booking.html'">Book Now</button>
+        `;
+        turfContainer.appendChild(card);
+      });
+    }
+
+    renderTurfs(turfData);
+
+    searchBar.addEventListener("input", () => {
+      const val = searchBar.value.toLowerCase();
+      const filtered = turfData.filter(t => t.name.toLowerCase().includes(val));
+      renderTurfs(filtered);
+    });
+  </script>
 </body>
 </html>
