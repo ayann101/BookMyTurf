@@ -144,39 +144,88 @@ form select,
   margin-bottom: 20px;
 }
 
-/* SLOT CONTAINER */
-.slot-container {
-  display: flex;
-  flex-wrap: wrap;
+/* CUSTOM DATE PICKER (PVR STYLE) */
+.custom-date-picker {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 10px;
-  justify-content: center;
+  margin: 10px 0;
+}
+
+.date-box {
+  background: linear-gradient(to bottom, #ffffff, #f0f0f0);
+  border: 2px solid #0077cc;
+  border-radius: 10px;
+  padding: 10px 5px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 13px;
+  color: #0077cc;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  transition: 0.3s;
+}
+
+.date-box:hover {
+  background: #e0f7ff;
+}
+
+.date-box.selected {
+  background: #0077cc;
+  color: white;
+  border-color: #005999;
+}
+
+/* SLOT CONTAINER (MODERN UI) */
+.slot-container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
   margin-top: 15px;
 }
 
 .slot {
-  width: 70px;
-  padding: 10px;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: bold;
+  padding: 12px 6px;
+  font-size: 13px;
+  border-radius: 10px;
   text-align: center;
   cursor: pointer;
+  border: 2px solid #00bcd4;
+  background: #e0f7fa;
+  color: #006064;
+  font-weight: bold;
   transition: 0.2s ease;
-  background-color: #d0f8ce;
-  color: #2e7d32;
-  border: 1px solid #aaa;
+  position: relative;
 }
 
-.slot.booked {
-  background-color: #ef5350;
-  color: white;
-  cursor: not-allowed;
-  text-decoration: line-through;
+.slot[data-type="day"]::after {
+  content: "Day";
+  font-size: 10px;
+  color: #2196f3;
+  display: block;
+  margin-top: 3px;
+}
+
+.slot[data-type="night"]::after {
+  content: "Night";
+  font-size: 10px;
+  color: #673ab7;
+  display: block;
+  margin-top: 3px;
 }
 
 .slot.selected {
-  background-color: #00acc1;
+  background: #00acc1;
   color: white;
+  border-color: #007c91;
+}
+
+.slot.booked {
+  background: #ef5350;
+  color: white;
+  border-color: #c62828;
+  text-decoration: line-through;
+  cursor: not-allowed;
 }
 
 /* PRICE & HOUR INFO */
@@ -297,7 +346,7 @@ footer {
   }
 
   .slot {
-    width: 60px;
+    width: 100%;
     font-size: 13px;
     padding: 8px;
   }
@@ -306,6 +355,7 @@ footer {
     font-size: 16px;
   }
 }
+
 .booking-form label {
   font-weight: bold;
   display: block;
@@ -323,7 +373,6 @@ footer {
   border-color: #4caf50;
 }
 
-/* Mobile improvements */
 @media (max-width: 480px) {
   .booking-heading {
     font-size: 22px;
@@ -331,7 +380,6 @@ footer {
   }
 
   .slot {
-    width: 50px;
     font-size: 12px;
     padding: 6px;
   }
@@ -345,5 +393,3 @@ footer {
     width: 100px;
   }
 }
- 
-

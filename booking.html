@@ -1,85 +1,62 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Galaxy Turf Booking</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BookMyTurf - Booking</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
 </head>
 <body>
-
   <nav>
-    <div class="logo">🏏 <strong>Galaxy Turf</strong></div>
+    <div class="logo">BookMyTurf</div>
     <div>
       <a href="index.html">Home</a>
-      <a href="booking.html" class="active">Booking</a>
+      <a href="booking.html">Booking</a>
       <a href="contact.html">Contact</a>
+      <a href="admin.html">Admin</a>
     </div>
   </nav>
 
-  <div class="container booking-container">
-    <h1 class="booking-heading">🏏 Book Your Slot Now</h1>
-
-    <form id="bookingForm" class="booking-form" autocomplete="off">
+  <div class="container">
+    <h2 class="booking-heading">Book Your Turf</h2>
+    <form id="bookingForm" class="booking-form">
       <label for="name">Your Name</label>
-      <input type="text" id="name" placeholder="Your Name" required />
+      <input type="text" id="name" name="name" required />
 
       <label for="phone">Phone Number</label>
-      <input type="tel" id="phone" placeholder="Phone Number" required maxlength="10" inputmode="numeric" />
+      <input type="tel" id="phone" name="phone" required />
 
       <label for="turf">Select Turf</label>
-      <select id="turf" required>
-        <option value="">Select Turf</option>
-        <option value="Galaxy Turf A">Galaxy Turf A</option>
-        <option value="Galaxy Turf B">Galaxy Turf B</option>
-        <option value="Galaxy Turf C">Galaxy Turf C</option>
-        <option value="Galaxy Turf D">Galaxy Turf D</option>
+      <select id="turf" name="turf" required>
+        <option value="">-- Select Turf --</option>
+        <option value="Turf 1">Turf 1</option>
+        <option value="Turf 2">Turf 2</option>
       </select>
 
-      <label for="date">Select Date</label>
-      <input type="date" id="date" required />
+      <label>Select Date</label>
+      <div id="customDatePicker" class="custom-date-picker"></div>
+      <input type="hidden" id="selectedDate" name="date" required />
 
       <label>Select Time Slots</label>
       <div id="slotContainer" class="slot-container"></div>
-      <div id="hourInfo" class="hour-info"></div>
-      <div id="totalPrice" class="total-price"></div>
 
-     
+      <div class="hour-info" id="hourInfo">Selected Hours: 0</div>
+      <div class="total-price" id="totalPrice">Total: ₹0</div>
 
-      <div class="payment-methods">
-        <h3>Pay using UPI</h3>
-        <img src="=" alt="Scan QR to Pay" />
-        
-          <button type="button">💰 Pay with GPay / PhonePe</button>
-        </a>
-      </div>
-
-       <button type="submit" class="submit-btn">✅ Confirm Booking</button>
+      <button type="submit" class="submit-btn">Confirm Booking</button>
     </form>
+
+    <div style="text-align:center; margin-top: 20px;">
+      <div id="qrContainer" style="margin-bottom: 10px;"></div>
+      <button id="downloadQR" style="display:none; padding:10px 20px; font-weight:bold;">⬇️ Download QR Code</button>
+    </div>
   </div>
 
-  <!-- Firebase Config -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  <footer>
+    <p>&copy; 2025 BookMyTurf. All rights reserved.</p>
+  </footer>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDFwv08E8IbZ5p9lSndv8EY8-yMQMuT0Eg",
-      authDomain: "bookmyturf-1fba9.firebaseapp.com",
-      projectId: "bookmyturf-1fba9",
-      storageBucket: "bookmyturf-1fba9.appspot.com",
-      messagingSenderId: "1055187444342",
-      appId: "1:1055187444342:web:c2276eb3eaf4e3d1b34c36",
-      measurementId: "G-WQ19J65FFG"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    window.db = db;
-  </script>
-
-  <!-- Booking Logic -->
   <script type="module" src="booking.js"></script>
 </body>
-</html>  
+</html>
