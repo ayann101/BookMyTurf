@@ -3,11 +3,14 @@ import {
   getDocs,
   addDoc,
   query,
-  where
+  where,
+  onSnapshot,
+  doc,
+  getDoc
 } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
-
 import { db } from './firebase-config.js';
 
+const turfSelect = document.getElementById("turf");
 const slotContainer = document.getElementById("slotContainer");
 const totalPriceEl = document.getElementById("totalPrice");
 const hourInfo = document.getElementById("hourInfo");
@@ -15,203 +18,278 @@ const bookingForm = document.getElementById("bookingForm");
 const selectedDateInput = document.getElementById("selectedDate");
 const qrContainer = document.getElementById("qrContainer");
 const downloadQRBtn = document.getElementById("downloadQR");
+const customDatePicker = document.getElementById("customDatePicker");
+const proceedBtn = document.getElementById("proceedBtn");
+const reviewSection = document.getElementById("reviewSection");
 
+let selectedSlots = []; // array of {date, time}
 const pricePerHour = 700;
-let selectedSlots = [];
+const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
-const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const months = ["January", "February", "March", "April", "May", "June",
-                "July", "August", "September", "October", "November", "December"];
+// ✅ Get label for time
+function getSlotLabel(hour) {
+  if (hour >= 6 && hour < 12) return "🌞 Subah";
+  if (hour >= 12 && hour < 16) return "☀️ Dopahar";
+  if (hour >= 16 && hour < 20) return "🌇 Shaam";
+  if (hour >= 20) return "🌃 Raat";
+  return "🌌 Midnight";
+}
 
+// ✅ Load Turf Dropdown
+async function loadTurfOptions() {
+  const snap = await getDocs(collection(db, "turfs"));
+  turfSelect.innerHTML = `<option value="">-- Select Turf --</option>`;
+  snap.forEach(docSnap => {
+    const t = docSnap.data();
+    const opt = document.createElement("option");
+    opt.value = docSnap.id;
+    opt.textContent = t.name;
+    turfSelect.appendChild(opt);
+  });
+
+  const saved = localStorage.getItem("selectedTurf");
+  if (saved) {
+    turfSelect.value = saved;
+    loadBookedSlots();
+  }
+}
+
+// ✅ Render Horizontal Dates
 function renderDates() {
   const today = new Date();
-  const picker = document.getElementById("customDatePicker");
-  picker.innerHTML = "";
-  picker.style.display = "flex";
-  picker.style.overflowX = "auto";
-  picker.style.gap = "10px";
-  picker.style.paddingBottom = "10px";
-
+  customDatePicker.innerHTML = "";
   for (let i = 0; i < 14; i++) {
-    const date = new Date();
-    date.setDate(today.getDate() + i);
-    const monthShort = months[date.getMonth()].slice(0, 3);
-    const dayShort = days[date.getDay()].slice(0, 3);
-    const display = `${monthShort} ${date.getDate()} ${dayShort}`;
-    const value = date.toISOString().split("T")[0];
-
+    const d = new Date();
+    d.setDate(today.getDate() + i);
+    const value = d.toISOString().split("T")[0];
     const box = document.createElement("div");
     box.className = "date-box";
-    box.innerText = display;
     box.dataset.value = value;
-
+    box.innerText = `${months[d.getMonth()]} ${d.getDate()} ${days[d.getDay()]}`;
     box.addEventListener("click", () => {
       document.querySelectorAll(".date-box").forEach(b => b.classList.remove("selected"));
       box.classList.add("selected");
       selectedDateInput.value = value;
-      loadBookedSlots();
+      localStorage.setItem("selectedDate", value);
+      renderSlots(value);
+      updateSlotStatuses(value);
+      listenToSlotUpdates(value);
     });
-
-    picker.appendChild(box);
+    customDatePicker.appendChild(box);
   }
+
+  const savedDate = localStorage.getItem("selectedDate");
+  const match = [...customDatePicker.children].find(b => b.dataset.value === savedDate);
+  if (match) match.click();
+  else customDatePicker.firstChild?.click();
 }
 
-function renderSlots() {
+// ✅ Render 24 Slots for Given Date
+function renderSlots(date) {
   slotContainer.innerHTML = "";
-  const selectedDateStr = selectedDateInput.value;
-  if (!selectedDateStr) return;
-
   const now = new Date();
 
   for (let i = 0; i < 24; i++) {
-    const slotDateTime = new Date(`${selectedDateStr}T${i.toString().padStart(2, "0")}:00:00`);
+    const slotDateTime = new Date(`${date}T${i.toString().padStart(2, "0")}:00:00`);
+    const wrapper = document.createElement("div");
+    wrapper.className = "slot-wrapper";
 
-    const hour = i % 12 === 0 ? 12 : i % 12;
-    const ampm = i >= 12 ? "PM" : "AM";
-    const timeStr = `${hour.toString().padStart(2, '0')}:00 ${ampm}`;
-
-    const slot = document.createElement("div");
-    slot.className = "slot";
-    slot.dataset.time = i.toString();
-    slot.dataset.type = i < 18 ? "day" : "night";
-    slot.innerText = timeStr;
+    const div = document.createElement("div");
+    div.className = "slot available";
+    div.dataset.time = i.toString();
+    div.dataset.date = date;
+    div.innerHTML = `
+      <div class="slot-label">${getSlotLabel(i)}</div>
+      <div class="slot-time">${(i % 12 || 12)}:00 ${i >= 12 ? "PM" : "AM"}</div>
+      <div class="slot-status">Available</div>
+    `;
 
     if (slotDateTime <= now) {
-      slot.classList.add("booked");
-      slot.style.opacity = 0.4;
-      slot.style.cursor = "not-allowed";
-    } else {
-      slot.classList.add("available");
+      div.classList.remove("available");
+      div.classList.add("booked");
+      div.querySelector(".slot-status").innerText = "Booked";
+      div.style.opacity = "0.4";
     }
 
-    slotContainer.appendChild(slot);
+    wrapper.appendChild(div);
+    slotContainer.appendChild(wrapper);
   }
+
+  // Re-apply selection state
+  selectedSlots.forEach(s => {
+    const match = document.querySelector(`.slot[data-date="${s.date}"][data-time="${s.time}"]`);
+    if (match) {
+      match.classList.add("selected");
+      match.querySelector(".slot-status").innerText = "Selected";
+    }
+  });
 }
 
+// ✅ Slot Click
+slotContainer.addEventListener("click", e => {
+  const el = e.target.closest(".slot");
+  if (!el || el.classList.contains("booked") || el.classList.contains("unavailable")) return;
+
+  const date = el.dataset.date;
+  const time = el.dataset.time;
+
+  const key = `${date}-${time}`;
+  const index = selectedSlots.findIndex(s => `${s.date}-${s.time}` === key);
+
+  if (index !== -1) {
+    selectedSlots.splice(index, 1);
+    el.classList.remove("selected");
+    el.querySelector(".slot-status").innerText = "Available";
+  } else {
+    selectedSlots.push({ date, time });
+    el.classList.add("selected");
+    el.querySelector(".slot-status").innerText = "Selected";
+  }
+
+  updateTotal();
+});
+
+// ✅ Total
 function updateTotal() {
   hourInfo.innerText = `Selected Hours: ${selectedSlots.length}`;
   totalPriceEl.innerText = `Total: ₹${selectedSlots.length * pricePerHour}`;
 }
 
-function toggleSlot(el) {
-  const time = parseInt(el.dataset.time);
-  if (el.classList.contains("booked")) return;
-
-  if (el.classList.contains("selected")) {
-    el.classList.remove("selected");
-    selectedSlots = selectedSlots.filter(t => parseInt(t) !== time);
-  } else {
-    if (selectedSlots.length > 0) {
-      const min = Math.min(...selectedSlots.map(Number));
-      const max = Math.max(...selectedSlots.map(Number));
-      if (time === max + 1 || time === min - 1) {
-        selectedSlots.push(time.toString());
-        el.classList.add("selected");
-      } else {
-        alert("Select consecutive slots only.");
-      }
-    } else {
-      selectedSlots.push(time.toString());
-      el.classList.add("selected");
-    }
-  }
-
-  updateTotal();
-}
-
-slotContainer.addEventListener("click", (e) => {
-  if (e.target.classList.contains("slot")) {
-    toggleSlot(e.target);
-  }
-});
-
-async function loadBookedSlots() {
-  renderSlots();
-
-  const turf = document.getElementById("turf").value;
-  const date = selectedDateInput.value;
+// ✅ Update Status
+async function updateSlotStatuses(date) {
+  const turf = turfSelect.value;
   if (!turf || !date) return;
 
-  const q = query(collection(db, "bookings"), where("turf", "==", turf), where("date", "==", date));
-  const snapshot = await getDocs(q);
+  const bookingSnap = await getDocs(query(collection(db, "bookings"), where("turf", "==", turf), where("date", "==", date)));
+  const bookedSet = new Set();
+  bookingSnap.forEach(d => (d.data().slots || []).forEach(s => bookedSet.add(s)));
 
-  const booked = new Set();
-  snapshot.forEach(doc => {
-    (doc.data().slots || []).forEach(s => booked.add(s));
-  });
+  const disabledSnap = await getDoc(doc(db, "disabledSlots", `${turf}_${date}`));
+  const disabledSet = new Set(disabledSnap.exists() ? disabledSnap.data().slots.map(s => s.toString()) : []);
 
-  document.querySelectorAll(".slot").forEach(el => {
-    const time = el.dataset.time;
-    if (booked.has(time)) {
-      el.classList.remove("available", "selected");
-      el.classList.add("booked");
+  document.querySelectorAll(`.slot[data-date="${date}"]`).forEach(slot => {
+    const t = slot.dataset.time;
+    if (slot.classList.contains("selected")) return;
+
+    slot.className = "slot available";
+    slot.querySelector(".slot-status").innerText = "Available";
+
+    if (bookedSet.has(t)) {
+      slot.classList.remove("available");
+      slot.classList.add("booked");
+      slot.querySelector(".slot-status").innerText = "Booked";
+    } else if (disabledSet.has(t)) {
+      slot.classList.remove("available");
+      slot.classList.add("unavailable");
+      slot.querySelector(".slot-status").innerText = "Unavailable";
     }
   });
-
-  selectedSlots = [];
-  updateTotal();
 }
 
-document.getElementById("turf").addEventListener("change", loadBookedSlots);
-document.getElementById("phone").addEventListener("input", function () {
-  this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);
-});
+// ✅ Realtime Firestore
+function listenToSlotUpdates(date) {
+  const turf = turfSelect.value;
+  if (!turf || !date) return;
 
-bookingForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
+  const disableRef = doc(db, "disabledSlots", `${turf}_${date}`);
+  onSnapshot(disableRef, () => updateSlotStatuses(date));
+
+  const bookingQ = query(collection(db, "bookings"), where("turf", "==", turf), where("date", "==", date));
+  onSnapshot(bookingQ, () => updateSlotStatuses(date));
+}
+
+// ✅ Proceed to Review
+proceedBtn.addEventListener("click", () => {
   const name = document.getElementById("name").value.trim();
   const phone = document.getElementById("phone").value.trim();
-  const turf = document.getElementById("turf").value;
-  const date = selectedDateInput.value;
+  const turf = turfSelect.value;
 
-  if (!name || !phone || !turf || !date || selectedSlots.length === 0) {
-    alert("Please fill all fields and select at least 1 slot.");
-    return;
+  if (!name || !phone || !turf || selectedSlots.length === 0) {
+    return alert("⚠️ कृपया सभी फ़ील्ड भरें और स्लॉट चुनें।");
   }
 
+  const rSlots = selectedSlots
+    .sort((a, b) => a.date.localeCompare(b.date) || a.time - b.time)
+    .map(s => `${s.date} - ${s.time}:00`)
+    .join(", ");
+
+  document.getElementById("rName").innerText = name;
+  document.getElementById("rPhone").innerText = phone;
+  document.getElementById("rTurf").innerText = turfSelect.options[turfSelect.selectedIndex].text;
+  document.getElementById("rDate").innerText = "-";
+  document.getElementById("rSlots").innerText = rSlots;
+  document.getElementById("rTotal").innerText = selectedSlots.length * pricePerHour;
+
+  localStorage.setItem("selectedTurf", turf);
+  localStorage.setItem("selectedSlots", JSON.stringify(selectedSlots));
+
+  reviewSection.style.display = "block";
+});
+
+// ✅ Final Submit
+bookingForm.addEventListener("submit", async e => {
+  e.preventDefault();
+  const termsCheck = document.getElementById("termsCheck");
+  if (!termsCheck.checked) return alert("⚠️ कृपया terms & conditions स्वीकार करें।");
+
+  const name = document.getElementById("name").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+  const turf = turfSelect.value;
+
+  // Group slots by date
+  const grouped = {};
+  selectedSlots.forEach(s => {
+    if (!grouped[s.date]) grouped[s.date] = [];
+    grouped[s.date].push(s.time);
+  });
+
   try {
-    await addDoc(collection(db, "bookings"), {
-      name,
-      phone,
-      turf,
-      date,
-      slots: selectedSlots,
-      timestamp: new Date().toISOString()
-    });
+    for (const [date, slots] of Object.entries(grouped)) {
+      await addDoc(collection(db, "bookings"), {
+        name, phone, turf, date, slots,
+        timestamp: new Date().toISOString()
+      });
+    }
 
-    alert(`\u2705 Booking Confirmed!\nName: ${name}\nSlots: ${selectedSlots.join(", ")}\nTotal: ₹${selectedSlots.length * pricePerHour}`);
-
-    const qrText = `Name: ${name}\nPhone: ${phone}\nTurf: ${turf}\nDate: ${date}\nSlots: ${selectedSlots.join(", ")}`;
+    const allSlotStr = selectedSlots.map(s => `${s.date} - ${s.time}:00`).join(", ");
     qrContainer.innerHTML = "";
-    const qr = new QRCode(qrContainer, {
-      text: qrText,
-      width: 200,
-      height: 200,
-      colorDark: "#000",
-      colorLight: "#fff",
+    new QRCode(qrContainer, {
+      text: `Name: ${name}\nTurf: ${turf}\nSlots: ${allSlotStr}`,
+      width: 200, height: 200,
+      colorDark: "#000", colorLight: "#fff",
       correctLevel: QRCode.CorrectLevel.H
     });
 
+    const link = `https://wa.me/91${phone}?text=${encodeURIComponent(
+      `✅ Booking Confirmed!\nName: ${name}\nTurf: ${turf}\nSlots: ${allSlotStr}\nTotal: ₹${selectedSlots.length * pricePerHour}`
+    )}`;
+    window.open(link, "_blank");
+    alert("✅ Booking Confirmed!");
+
+    downloadQRBtn.style.display = "inline-block";
     setTimeout(() => {
-      const qrCanvas = qrContainer.querySelector("canvas");
-      if (qrCanvas) {
-        downloadQRBtn.style.display = "inline-block";
+      const canvas = qrContainer.querySelector("canvas");
+      if (canvas) {
         downloadQRBtn.onclick = () => {
-          const url = qrCanvas.toDataURL("image/png");
           const a = document.createElement("a");
-          a.href = url;
-          a.download = `Booking_QR_${name}_${date}.png`;
+          a.href = canvas.toDataURL("image/png");
+          a.download = `Booking_${name}.png`;
           a.click();
         };
       }
     }, 500);
 
-    loadBookedSlots();
+    reviewSection.style.display = "none";
+    selectedSlots = [];
+    renderSlots(selectedDateInput.value);
+    updateTotal();
   } catch (err) {
-    console.error("Booking failed:", err);
-    alert("Error during booking. Please try again.");
+    console.error("❌ Booking Error:", err);
+    alert("❌ Booking failed. Try again.");
   }
 });
 
+// ✅ Init
+loadTurfOptions();
 renderDates();
-renderSlots();

@@ -3,90 +3,189 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Verify Booking | BookMyTurf</title>
-  <link rel="stylesheet" href="style.css" />
-  <style>
-    .qr-box {
-      text-align: center;
-      padding: 20px;
-    }
-    video {
-      width: 100%;
-      max-width: 400px;
-      border-radius: 12px;
-      box-shadow: 0 0 20px rgba(0,255,0,0.2);
-    }
-    .result {
-      margin-top: 20px;
-      padding: 15px;
-      border-radius: 10px;
-      background: #f1f1f1;
-      font-size: 18px;
-    }
-    .success { background: #c8f7c5; border-left: 6px solid #2ecc71; }
-    .error { background: #f7c6c6; border-left: 6px solid #e74c3c; }
-  </style>
-</head>
-<body>
-  <div class="qr-box">
-    <h2>📸 Scan Booking QR Code</h2>
-    <video id="preview"></video>
-    <div id="bookingResult" class="result"></div>
-  </div>
+  <title>QR Verify - BookMyTurf</title>
 
-  <!-- Firebase Config -->
+  <!-- Firebase -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import {
-      getFirestore,
-      doc,
-      getDoc
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
 
     const firebaseConfig = {
-      apiKey: "AIzaSyDFwv08E8IbZ5p9lSndv8EY8-yMQMuT0Eg",
-      authDomain: "bookmyturf-1fba9.firebaseapp.com",
-      projectId: "bookmyturf-1fba9",
-      storageBucket: "bookmyturf-1fba9.appspot.com",
-      messagingSenderId: "1055187444342",
-      appId: "1:1055187444342:web:c2276eb3eaf4e3d1b34c36",
-      measurementId: "G-WQ19J65FFG"
+      apiKey: "AIzaSyAxL3iOY6RWc0w9XosOW332hT4Zr2IFJjk",
+      authDomain: "bookmyturf-d6141.firebaseapp.com",
+      projectId: "bookmyturf-d6141",
+      storageBucket: "bookmyturf-d6141.appspot.com",
+      messagingSenderId: "591525544980",
+      appId: "1:591525544980:web:6b1db646a3d50d83935301"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    import QrScanner from "https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner.min.js";
-    QrScanner.WORKER_PATH = 'https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner-worker.min.js';
+    window.verifyBooking = async (codeInput = null) => {
+      const code = codeInput || document.getElementById("bookingCode").value.trim();
+      const resultDiv = document.getElementById("result");
+      resultDiv.innerHTML = "";
+      if (!code) return alert("Please enter or scan a booking code.");
 
-    const video = document.getElementById('preview');
-    const resultBox = document.getElementById('bookingResult');
+      try {
+        const docRef = doc(db, "bookings", code);
+        const docSnap = await getDoc(docRef);
 
-    const scanner = new QrScanner(video, async result => {
-      scanner.stop();
-      resultBox.innerText = "Checking booking...";
-      const bookingId = result.data;
+        if (!docSnap.exists()) {
+          resultDiv.innerHTML = `<div class="error">❌ Booking not found</div>`;
+          return;
+        }
 
-      const docRef = doc(db, "bookings", bookingId);
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
         const data = docSnap.data();
-        resultBox.innerHTML = `
-          <div class="success">
-            ✅ Booking Verified!<br>
-            <strong>Name:</strong> ${data.name}<br>
-            <strong>Phone:</strong> ${data.phone}<br>
-            <strong>Turf:</strong> ${data.turf}<br>
-            <strong>Time:</strong> ${data.slots.join(', ')}
+        const name = data.name;
+        const phone = data.phone;
+        const turf = data.turf;
+        const dateStr = new Date(data.date).toDateString();
+        const slots = (data.slots || []).map(s => parseInt(s)).sort((a, b) => a - b);
+        const fromTime = formatTime(slots[0]);
+        const toTime = formatTime(slots[slots.length - 1] + 1);
+
+        resultDiv.innerHTML = `
+          <div class="card">
+            <h3>✅ Valid Booking</h3>
+            <p><strong>Name:</strong> ${name}</p>
+            <p><strong>Phone:</strong> ${phone}</p>
+            <p><strong>Turf:</strong> ${turf}</p>
+            <p><strong>Date:</strong> ${formatDate(data.date)}</p>
+            <p><strong>Time:</strong> ${fromTime} – ${toTime}</p>
+            <p><strong>Booking Code:</strong> ${code}</p>
           </div>
         `;
-      } else {
-        resultBox.innerHTML = `<div class="error">❌ Booking not found!</div>`;
+      } catch (e) {
+        resultDiv.innerHTML = `<div class="error">❌ Error verifying booking</div>`;
+        console.error(e);
       }
-    });
+    };
 
-    scanner.start();
+    function formatTime(hour) {
+      const h = hour % 24;
+      const suffix = h >= 12 ? "PM" : "AM";
+      const std = (h % 12) || 12;
+      return `${std}:00 ${suffix}`;
+    }
+
+    function formatDate(d) {
+      const date = new Date(d);
+      const options = { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' };
+      return date.toLocaleDateString('en-US', options);
+    }
   </script>
+
+  <!-- HTML5 QRCode Scanner -->
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom right, #e0f7fa, #ffffff);
+      margin: 0;
+      padding: 2rem 1rem;
+      text-align: center;
+      color: #333;
+    }
+    h1 {
+      color: #00796b;
+    }
+    input {
+      padding: 0.7rem;
+      width: 80%;
+      max-width: 400px;
+      margin: 1rem auto;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 1rem;
+    }
+    button {
+      padding: 0.7rem 1.5rem;
+      background-color: #00796b;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+    button:hover {
+      background-color: #004d40;
+    }
+    .card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      margin-top: 2rem;
+      text-align: left;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .card h3 {
+      margin-top: 0;
+      color: green;
+    }
+    .card p {
+      margin: 0.5rem 0;
+    }
+    .error {
+      color: red;
+      font-weight: bold;
+      margin-top: 1.5rem;
+    }
+    #reader {
+      width: 300px;
+      margin: 1rem auto;
+    }
+    @media (max-width: 600px) {
+      input, button, #reader {
+        width: 90%;
+      }
+      .card {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>📷 QR Scan & Verify</h1>
+
+  <input type="text" id="bookingCode" placeholder="Enter Booking Code..." />
+  <br />
+  <button onclick="verifyBooking()">Verify Booking</button>
+
+  <div id="reader"></div>
+  <div id="result"></div>
+
+  <script>
+    const html5QrCode = new Html5Qrcode("reader");
+
+    Html5Qrcode.getCameras().then(devices => {
+      if (devices && devices.length) {
+        html5QrCode.start(
+          { facingMode: "environment" },
+          {
+            fps: 10,
+            qrbox: { width: 250, height: 250 }
+          },
+          (decodedText, decodedResult) => {
+            document.getElementById("bookingCode").value = decodedText;
+            verifyBooking(decodedText);
+            html5QrCode.stop();
+            document.getElementById("reader").innerHTML = "✅ Scanned";
+          },
+          err => {}
+        );
+      }
+    }).catch(err => {
+      console.error("Camera error", err);
+    });
+  </script>
+
 </body>
 </html>

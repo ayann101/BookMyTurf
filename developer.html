@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Developer Panel - BookMyTurf</title>
+  <link rel="stylesheet" href="developer-style.css" />
+</head>
+<body>
+  <nav class="dev-nav">
+    <div class="logo">BookMyTurf Developer</div>
+    <ul>
+      <li><a href="index.html">🏠 Home</a></li>
+      <li><a href="booking.html">📅 Booking</a></li>
+      <li><a href="admin.html">🛠 Admin</a></li>
+    </ul>
+  </nav>
+
+  <div class="dev-container">
+    <h2>➕ Add New Turf</h2>
+    <form id="turfForm">
+      <input type="text" id="name" placeholder="Turf Name" required />
+      <input type="text" id="location" placeholder="Location" required />
+      <input type="url" id="imageUrl" placeholder="Turf Image URL" required />
+      <input type="url" id="logoUrl" placeholder="Logo Image URL" required />
+      <input type="number" id="rating" placeholder="Rating (1-5)" min="1" max="5" required />
+      <button type="submit">➕ Add Turf</button>
+    </form>
+
+    <h2>📋 All Turfs</h2>
+    <div id="turfList" class="turf-list">
+      <!-- Turf Cards will be loaded here -->
+    </div>
+  </div>
+
+  <script type="module" src="developer.js"></script>
+</body>
+</html>

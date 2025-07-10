@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BookMyTurf - Booking</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="booking.css" />
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
 </head>
 <body>
@@ -20,36 +20,58 @@
 
   <div class="container">
     <h2 class="booking-heading">Book Your Turf</h2>
+
     <form id="bookingForm" class="booking-form">
       <label for="name">Your Name</label>
-      <input type="text" id="name" name="name" required />
+      <input type="text" id="name" required />
 
       <label for="phone">Phone Number</label>
-      <input type="tel" id="phone" name="phone" required />
+      <input type="tel" id="phone" required />
 
       <label for="turf">Select Turf</label>
-      <select id="turf" name="turf" required>
+      <select id="turf" required>
         <option value="">-- Select Turf --</option>
-        <option value="Turf 1">Turf 1</option>
-        <option value="Turf 2">Turf 2</option>
       </select>
 
       <label>Select Date</label>
       <div id="customDatePicker" class="custom-date-picker"></div>
-      <input type="hidden" id="selectedDate" name="date" required />
+      <input type="hidden" id="selectedDate" />
 
       <label>Select Time Slots</label>
-      <div id="slotContainer" class="slot-container"></div>
 
+      <!-- SLOT GRID -->
+      <div id="slotContainer" class="slot-grid"></div>
+
+      <!-- HOURS & PRICE -->
       <div class="hour-info" id="hourInfo">Selected Hours: 0</div>
       <div class="total-price" id="totalPrice">Total: ₹0</div>
 
-      <button type="submit" class="submit-btn">Confirm Booking</button>
+      <!-- PROCEED BUTTON -->
+      <button type="button" id="proceedBtn" class="submit-btn">Proceed to Payment</button>
+
+      <!-- REVIEW SECTION -->
+      <div id="reviewSection" style="display:none; margin-top:20px;">
+        <h3>🔍 Booking Summary</h3>
+        <p><strong>Name:</strong> <span id="rName"></span></p>
+        <p><strong>Phone:</strong> <span id="rPhone"></span></p>
+        <p><strong>Turf:</strong> <span id="rTurf"></span></p>
+        <p><strong>Date:</strong> <span id="rDate"></span></p>
+        <p><strong>Slots:</strong> <span id="rSlots"></span></p>
+        <p><strong>Total:</strong> ₹<span id="rTotal"></span></p>
+
+        <div>
+          <input type="checkbox" id="termsCheck" />
+          <label for="termsCheck">I agree to the <a href="#">terms & conditions</a>.</label>
+        </div>
+
+        <button type="submit" class="submit-btn">Confirm Booking</button>
+      </div>
     </form>
 
-    <div style="text-align:center; margin-top: 20px;">
-      <div id="qrContainer" style="margin-bottom: 10px;"></div>
-      <button id="downloadQR" style="display:none; padding:10px 20px; font-weight:bold;">⬇️ Download QR Code</button>
+    <!-- QR Section -->
+    <div style="text-align:center; margin-top:20px;">
+      <div id="qrContainer"></div>
+      <button id="downloadQR" style="display:none;">⬇️ Download QR Code</button>
     </div>
   </div>
 

@@ -1,0 +1,236 @@
+/* booking.css */
+
+/* Reset and Base Styles */
+body {
+  margin: 0;
+  font-family: "Segoe UI", sans-serif;
+  background: #f9f9f9;
+  color: #333;
+}
+
+nav {
+  background-color: #fff;
+  border-bottom: 1px solid #ccc;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+nav .logo {
+  font-weight: bold;
+  font-size: 20px;
+}
+
+nav a {
+  margin-left: 15px;
+  text-decoration: none;
+  color: #444;
+  font-weight: 500;
+}
+
+.container {
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
+}
+
+.booking-heading {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 24px;
+  color: #222;
+}
+
+/* Form Styles */
+.booking-form label {
+  font-weight: 600;
+  display: block;
+  margin-top: 15px;
+  margin-bottom: 5px;
+}
+
+.booking-form input,
+.booking-form select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.submit-btn {
+  background-color: #2e8b57;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  margin-top: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.submit-btn:hover {
+  background-color: #256b45;
+}
+
+/* Custom Date Picker */
+.custom-date-picker {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 10px 0;
+}
+
+.date-box {
+  flex: 0 0 auto;
+  padding: 8px 14px;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 14px;
+  transition: background 0.3s;
+}
+
+.date-box.selected {
+  background-color: #2e8b57;
+  color: white;
+  border-color: #2e8b57;
+}
+
+/* Slot Styles */
+.slot-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 15px;
+  justify-content: flex-start;
+}
+
+.slot-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 80px;
+}
+
+.slot {
+  width: 100%;
+  height: 55px;
+  background-color: #fff;
+  border: 1px solid rgba(0,0,0,0.2);
+  border-radius: 6px;
+  text-align: center;
+  font-size: 13px;
+  padding: 5px 3px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.slot-label {
+  font-size: 11px;
+  margin-bottom: 3px;
+  font-weight: 500;
+  color: #777;
+}
+
+/* Slot Status Colors */
+.slot.available {
+  background-color: #fff;
+  color: #333;
+}
+
+.slot.selected {
+  background-color: #d4f5d4; /* soft green */
+  border-color: #44a444;
+}
+
+.slot.booked {
+  background-color: #fddddd; /* light red */
+  color: #a33;
+  border-color: #a33;
+}
+
+.slot.pending {
+  background-color: #fff8dc; /* light yellow */
+  color: #b8860b;
+  border-color: #b8860b;
+}
+
+.slot.unavailable {
+  background-color: #e0e0e0; /* light gray */
+  color: #666;
+  border-color: #aaa;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* Info Text */
+.hour-info,
+.total-price {
+  font-weight: 600;
+  margin-top: 10px;
+  font-size: 16px;
+}
+
+/* Review Section */
+#reviewSection {
+  background: #fafafa;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+#reviewSection h3 {
+  margin-top: 0;
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 20px 0;
+  margin-top: 40px;
+  background: #f1f1f1;
+  font-size: 14px;
+}
+
+/* QR Button */
+#downloadQR {
+  margin-top: 10px;
+  padding: 10px 15px;
+  border: none;
+  background: #555;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#downloadQR:hover {
+  background: #333;
+}
+
+/* Mobile Responsive */
+@media (max-width: 600px) {
+  .slot-wrapper {
+    width: 65px;
+  }
+
+  .slot {
+    height: 50px;
+    font-size: 12px;
+  }
+
+  .slot-label {
+    font-size: 10px;
+  }
+
+  .booking-heading {
+    font-size: 20px;
+  }
+}
